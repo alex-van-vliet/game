@@ -4,6 +4,7 @@
 #include <SDL.h>
 #include <stdexcept>
 #include <memory>
+#include "function-wrapper.hh"
 
 namespace {
     // Creates a deleter for unique_ptr from a function
@@ -68,22 +69,23 @@ namespace libsdl {
      * @tparam FUN The function to wrap
      * @tparam CHECK Whether to check the return value for errors (only used if the return type is not void)
      */
-    template<auto FUN, bool CHECK = true>
+    template<FunctionWrapperConcept FUN, bool CHECK = true>
     class Wrapper {
-        using out_t = decltype(return_type(FUN));
     public:
+        using out_t = FUN::out_t;
+
         constexpr void operator()(auto &&... arguments) const requires(std::is_void_v<out_t>) {
-            FUN(std::forward<decltype(as_raw(arguments))>(as_raw(arguments))...);
+            FUN{}(std::forward<decltype(as_raw(arguments))>(as_raw(arguments))...);
         }
 
         constexpr out_t operator()(auto &&... arguments) const requires (!CHECK &&
                                                                          !std::is_void_v<out_t>) {
-            return FUN(std::forward<decltype(as_raw(arguments))>(as_raw(arguments))...);
+            return FUN{}(std::forward<decltype(as_raw(arguments))>(as_raw(arguments))...);
         }
 
         constexpr out_t operator()(auto &&... arguments) const requires (CHECK &&
                                                                          std::is_pointer_v<out_t>) {
-            auto res = FUN(std::forward<decltype(as_raw(arguments))>(as_raw(arguments))...);
+            auto res = FUN{}(std::forward<decltype(as_raw(arguments))>(as_raw(arguments))...);
 
             if (res == nullptr) {
                 throw std::runtime_error(SDL_GetError());
@@ -95,7 +97,7 @@ namespace libsdl {
         constexpr out_t operator()(auto &&... arguments) const requires (CHECK &&
                                                                          std::is_integral_v<out_t> &&
                                                                          std::is_signed_v<out_t>) {
-            auto res = FUN(std::forward<decltype(as_raw(arguments))>(as_raw(arguments))...);
+            auto res = FUN{}(std::forward<decltype(as_raw(arguments))>(as_raw(arguments))...);
 
             if (res < 0) {
                 throw std::runtime_error(SDL_GetError());
@@ -120,16 +122,16 @@ namespace libsdl {
     };
 
     // The SDL Wrappers
-    constexpr Wrapper<SDL_Init> init;
+    constexpr Wrapper<FunctionWrapper<SDL_Init>> init;
     using Window = std::unique_ptr<SDL_Window, Deleter<SDL_DestroyWindow>>;
-    constexpr TypeWrapper<Wrapper<SDL_CreateWindow, true>, Window> create_window;
+    constexpr TypeWrapper<Wrapper<FunctionWrapper<SDL_CreateWindow>, true>, Window> create_window;
     using WindowSurface = std::unique_ptr<SDL_Surface, NoDeleter>;
-    constexpr TypeWrapper<Wrapper<SDL_GetWindowSurface>, WindowSurface> get_window_surface;
-    constexpr Wrapper<SDL_FillRect> fill_rect;
-    constexpr Wrapper<SDL_MapRGB, false> map_rgb;
-    constexpr Wrapper<SDL_UpdateWindowSurface> update_window_surface;
-    constexpr Wrapper<SDL_PollEvent, false> poll_event;
-    constexpr Wrapper<SDL_Quit> quit;
+    constexpr TypeWrapper<Wrapper<FunctionWrapper<SDL_GetWindowSurface>>, WindowSurface> get_window_surface;
+    constexpr Wrapper<FunctionWrapper<SDL_FillRect>> fill_rect;
+    constexpr Wrapper<FunctionWrapper<SDL_MapRGB>, false> map_rgb;
+    constexpr Wrapper<FunctionWrapper<SDL_UpdateWindowSurface>> update_window_surface;
+    constexpr Wrapper<FunctionWrapper<SDL_PollEvent>, false> poll_event;
+    constexpr Wrapper<FunctionWrapper<SDL_Quit>> quit;
 
     // Just a simple Context class to use RAII for init and quit
     class Context {
