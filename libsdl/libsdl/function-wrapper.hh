@@ -10,6 +10,10 @@ namespace {
 }
 
 namespace libsdl {
+    /**
+     * Concept representing any function wrapper
+     * @tparam T The wrapper
+     */
     template<typename T>
     concept FunctionWrapperConcept = requires(const T t) {
         typename T::out_t;
@@ -17,6 +21,10 @@ namespace libsdl {
         // &T::operator();
     };
 
+    /**
+     * Wraps a function into an object (base wrapper)
+     * @tparam FUN The function
+     */
     template<auto FUN>
     class FunctionWrapper {
     public:

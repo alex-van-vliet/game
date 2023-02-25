@@ -18,9 +18,15 @@ namespace {
     // Create a functor to get the SDL error
     using GetError = decltype([]() { return SDL_GetError(); });
 
+    // Helper to create a wrapper that only supports automatic smart pointer to raw pointer conversion
     template<auto FUN>
     using UncheckedWrapper = libsdl::SmartPointerRemoverWrapper<libsdl::FunctionWrapper<FUN>>;
 
+    /**
+     * Helper to automatically determine the correct way to test a value and call the error functor
+     * @tparam T The type of the checked value
+     * @tparam ERROR A functor to get the error message
+     */
     template<typename T, typename ERROR>
     class Checker {
     };
@@ -45,6 +51,12 @@ namespace {
         }
     };
 
+    /**
+     * Helper to create a wrapper that adds the error checker if the return type is not void
+     * @tparam FUN The function to wrap
+     * @tparam OUT The output type of the function
+     * @tparam ERROR The error message functor
+     */
     template<auto FUN, typename OUT, typename ERROR>
     class WrapperHelper {
     public:
@@ -57,9 +69,12 @@ namespace {
         using type = UncheckedWrapper<FUN>;
     };
 
+    // Helper to create a wrapper that supports automatic error checking and smart pointer to raw pointer conversion
     template<auto FUN, typename ERROR=GetError>
     using Wrapper = typename WrapperHelper<FUN, typename libsdl::FunctionWrapper<FUN>::out_t, ERROR>::type;
 
+    // Helper to create a wrapper that supports type conversion, automatic error checking and
+    // smart pointer to raw pointer conversion
     template<auto FUN, typename OUT, typename ERROR=GetError>
     using TypedWrapper = libsdl::TypeWrapper<Wrapper<FUN, ERROR>, OUT>;
 }
