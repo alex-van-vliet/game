@@ -10,20 +10,9 @@
 namespace {
     // Creates a deleter for unique_ptr from a function
     template<auto FUN>
-    class Deleter {
-    public:
-        template<typename T>
-        constexpr void operator()(T *arg) const {
-            FUN(arg);
-        }
-    };
-
+    using Deleter = decltype([](auto *arg) { FUN(arg); });
     // Creates a deleter for unique_ptr which does nothing
-    class NoDeleter {
-    public:
-        template<typename T>
-        constexpr void operator()(T *arg) const {}
-    };
+    using NoDeleter = decltype([](auto *arg) { });
 }
 
 namespace libsdl {
