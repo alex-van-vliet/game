@@ -10,7 +10,6 @@ namespace libsdl {
         t(v);
     };
 
-
     /**
      * Wrapper to check if the function returns an error
      *
