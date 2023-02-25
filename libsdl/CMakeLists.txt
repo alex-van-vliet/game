@@ -1,4 +1,4 @@
-add_library(libsdl INTERFACE libsdl/sdl.hh libsdl/function-wrapper.hh libsdl/type-wrapper.hh)
+add_library(libsdl INTERFACE libsdl/sdl.hh libsdl/function-wrapper.hh libsdl/type-wrapper.hh libsdl/wrapper.hh)
 target_include_directories(libsdl INTERFACE .)
 
 find_package(SDL2 REQUIRED)
