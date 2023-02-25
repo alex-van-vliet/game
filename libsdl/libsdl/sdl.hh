@@ -108,16 +108,18 @@ namespace libsdl {
     };
 
     /**
-     * Secondary wrapper to change the return type of the function
+     * Wrapper to change the return type of the function
      *
-     * @tparam WRAPPER Wrapped function
+     * @tparam FUN The function to wrap
      * @tparam OUT The new return type
      */
-    template<typename WRAPPER, typename OUT>
+    template<FunctionWrapperConcept FUN, typename OUT>
     class TypeWrapper {
     public:
+        using out_t = OUT;
+
         constexpr OUT operator()(auto &&... arguments) const {
-            return OUT{WRAPPER{}(std::forward<decltype(arguments)>(arguments)...)};
+            return OUT{FUN{}(std::forward<decltype(arguments)>(arguments)...)};
         }
     };
 
