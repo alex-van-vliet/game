@@ -1,5 +1,5 @@
-#ifndef FUNCTION_WRAPPER_HH
-#define FUNCTION_WRAPPER_HH
+#ifndef LIBSDL_FUNCTION_WRAPPER_HH
+#define LIBSDL_FUNCTION_WRAPPER_HH
 
 #include<utility>
 
@@ -28,4 +28,4 @@ namespace libsdl {
     };
 }
 
-#endif //FUNCTION_WRAPPER_HH
+#endif //LIBSDL_FUNCTION_WRAPPER_HH
