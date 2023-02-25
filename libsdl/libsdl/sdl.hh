@@ -1,4 +1,5 @@
-#pragma once
+#ifndef LIBSDL_SDL_HH
+#define LIBSDL_SDL_HH
 
 #include <SDL.h>
 #include <stdexcept>
@@ -150,3 +151,5 @@ namespace libsdl {
         }
     };
 }
+
+#endif
