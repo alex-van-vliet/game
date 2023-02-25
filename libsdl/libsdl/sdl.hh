@@ -152,4 +152,4 @@ namespace libsdl {
     };
 }
 
-#endif
+#endif //LIBSDL_SDL_HH
