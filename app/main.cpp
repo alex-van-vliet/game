@@ -1,7 +1,7 @@
 #include <libsdl/sdl.hh>
 
 int main() {
-    libsdl::Context context;
+    libsdl::Context context(SDL_INIT_VIDEO);
 
     auto window =
             libsdl::create_window("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,

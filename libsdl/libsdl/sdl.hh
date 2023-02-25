@@ -142,8 +142,8 @@ namespace libsdl {
     // Just a simple Context class to use RAII for init and quit
     class Context {
     public:
-        Context() {
-            init(SDL_INIT_VIDEO);
+        explicit Context(Uint32 flags) {
+            init(flags);
         }
 
         ~Context() {
