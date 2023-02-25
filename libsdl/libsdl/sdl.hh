@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <memory>
 #include "function-wrapper.hh"
+#include "type-wrapper.hh"
 
 namespace {
     // Creates a deleter for unique_ptr from a function
@@ -104,22 +105,6 @@ namespace libsdl {
             }
 
             return res;
-        }
-    };
-
-    /**
-     * Wrapper to change the return type of the function
-     *
-     * @tparam FUN The function to wrap
-     * @tparam OUT The new return type
-     */
-    template<FunctionWrapperConcept FUN, typename OUT>
-    class TypeWrapper {
-    public:
-        using out_t = OUT;
-
-        constexpr OUT operator()(auto &&... arguments) const {
-            return OUT{FUN{}(std::forward<decltype(arguments)>(arguments)...)};
         }
     };
 
