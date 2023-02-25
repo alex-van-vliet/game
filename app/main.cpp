@@ -1,4 +1,4 @@
-#include <libsdl/sdl.hh>
+#include <libsdl/wrappers.hh>
 
 int main() {
     libsdl::Context context(SDL_INIT_VIDEO);

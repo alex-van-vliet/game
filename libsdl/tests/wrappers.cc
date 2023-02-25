@@ -1,5 +1,5 @@
 #include <catch2/catch_all.hpp>
-#include <libsdl/sdl.hh>
+#include <libsdl/wrappers.hh>
 
 using namespace libsdl;
 
