@@ -41,14 +41,6 @@ namespace {
     };
 
     template<typename T, typename D>
-    class AsRaw<std::unique_ptr<T, D> &&> {
-    public:
-        static constexpr auto call(std::unique_ptr<T, D> &&t) {
-            return t.get();
-        }
-    };
-
-    template<typename T, typename D>
     class AsRaw<const std::unique_ptr<T, D> &> {
     public:
         static constexpr auto call(const std::unique_ptr<T, D> &t) {
