@@ -96,13 +96,35 @@ namespace libsdl {
 
     // Just a simple Context class to use RAII for init and quit
     class Context {
+        bool should_delete;
+
     public:
-        explicit Context(Uint32 flags) {
+        explicit Context(Uint32 flags) : should_delete{true} {
             init(flags);
         }
 
         ~Context() {
-            quit();
+            if (should_delete)
+                quit();
+        }
+
+        Context(const Context &) = delete;
+
+        Context &operator=(const Context &) = delete;
+
+        Context(Context &&other) noexcept: should_delete{false} {
+            swap(*this, other);
+        }
+
+        Context &operator=(Context &&other) noexcept {
+            swap(*this, other);
+
+            return *this;
+        }
+
+        friend void swap(Context &first, Context &second) {
+            using std::swap;
+            swap(first.should_delete, second.should_delete);
         }
     };
 }
