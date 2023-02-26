@@ -14,35 +14,35 @@ namespace {
 
     // Helper to create a wrapper that only supports automatic smart pointer to
     // raw pointer conversion
-    template <auto FUN>
+    template <auto Function>
     using UncheckedWrapper =
-        libsdl::SmartPointerRemoverWrapper<libsdl::FunctionWrapper<FUN>>;
+        libsdl::SmartPointerRemoverWrapper<libsdl::FunctionWrapper<Function>>;
 
     /**
      * Helper to automatically determine the correct way to test a value and
      * call the error functor
      * @tparam T The type of the checked value
-     * @tparam ERROR A functor to get the error message
+     * @tparam Error A functor to get the error message
      */
-    template <typename T, typename ERROR>
+    template <typename T, typename Error>
     class Checker {};
 
-    template <std::signed_integral T, typename ERROR>
-    class Checker<T, ERROR> {
+    template <std::signed_integral T, typename Error>
+    class Checker<T, Error> {
       public:
         void operator()(auto res) {
             if (res < 0) {
-                throw std::runtime_error(ERROR{}());
+                throw std::runtime_error(Error{}());
             }
         }
     };
 
-    template <typename T, typename ERROR>
-    class Checker<T*, ERROR> {
+    template <typename T, typename Error>
+    class Checker<T*, Error> {
       public:
         void operator()(const T* res) {
             if (res == nullptr) {
-                throw std::runtime_error(ERROR{}());
+                throw std::runtime_error(Error{}());
             }
         }
     };
@@ -50,33 +50,34 @@ namespace {
     /**
      * Helper to create a wrapper that adds the error checker if the return type
      * is not void
-     * @tparam FUN The function to wrap
-     * @tparam OUT The output type of the function
-     * @tparam ERROR The error message functor
+     * @tparam Function The function to wrap
+     * @tparam Out The output type of the function
+     * @tparam Error The error message functor
      */
-    template <auto FUN, typename OUT, typename ERROR>
+    template <auto Function, typename Out, typename Error>
     class WrapperHelper {
       public:
-        using type = libsdl::ErrorCheckerWrapper<UncheckedWrapper<FUN>,
-                                                 Checker<OUT, ERROR>>;
+        using type = libsdl::ErrorCheckerWrapper<UncheckedWrapper<Function>,
+                                                 Checker<Out, Error>>;
     };
 
-    template <auto FUN, typename ERROR>
-    class WrapperHelper<FUN, void, ERROR> {
+    template <auto Function, typename Error>
+    class WrapperHelper<Function, void, Error> {
       public:
-        using type = UncheckedWrapper<FUN>;
+        using type = UncheckedWrapper<Function>;
     };
 
     // Helper to create a wrapper that supports automatic error checking and
     // smart pointer to raw pointer conversion
-    template <auto FUN, typename ERROR = GetError>
+    template <auto Function, typename Error = GetError>
     using Wrapper = typename WrapperHelper<
-        FUN, typename libsdl::FunctionWrapper<FUN>::out_t, ERROR>::type;
+        Function, typename libsdl::FunctionWrapper<Function>::out_t,
+        Error>::type;
 
     // Helper to create a wrapper that supports type conversion, automatic error
     // checking and smart pointer to raw pointer conversion
-    template <auto FUN, typename OUT, typename ERROR = GetError>
-    using TypedWrapper = libsdl::TypeWrapper<Wrapper<FUN, ERROR>, OUT>;
+    template <auto Function, typename Out, typename Error = GetError>
+    using TypedWrapper = libsdl::TypeWrapper<Wrapper<Function, Error>, Out>;
 } // namespace
 
 namespace libsdl {

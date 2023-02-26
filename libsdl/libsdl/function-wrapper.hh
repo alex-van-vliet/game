@@ -6,8 +6,8 @@
 namespace {
     // Forward-declaration only, used for decltype to get the return type of a
     // function pointer
-    template <typename OUT, typename... INS>
-    OUT return_type(OUT (*)(INS...));
+    template <typename Out, typename... INS>
+    Out return_type(Out (*)(INS...));
 } // namespace
 
 namespace libsdl {
@@ -27,15 +27,15 @@ namespace libsdl {
 
     /**
      * Wraps a function into an object (base wrapper)
-     * @tparam FUN The function
+     * @tparam Function The function
      */
-    template <auto FUN>
+    template <auto Function>
     class FunctionWrapper {
       public:
-        using out_t = decltype(return_type(FUN));
+        using out_t = decltype(return_type(Function));
 
         constexpr out_t operator()(auto&&... arguments) const {
-            return FUN(std::forward<decltype(arguments)>(arguments)...);
+            return Function(std::forward<decltype(arguments)>(arguments)...);
         }
     };
 } // namespace libsdl

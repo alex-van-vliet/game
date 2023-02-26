@@ -43,16 +43,16 @@ namespace libsdl {
     /**
      * Wrapper to remove the smart pointers in the arguments
      *
-     * @tparam FUN The function to wrap
+     * @tparam Function The function to wrap
      * @tparam OUT The new return type
      */
-    template <FunctionWrapperConcept FUN>
+    template <FunctionWrapperConcept Function>
     class SmartPointerRemoverWrapper {
       public:
-        using out_t = FUN::out_t;
+        using out_t = Function::out_t;
 
         constexpr out_t operator()(auto&&... arguments) const {
-            return FUN{}(detail::as_raw(
+            return Function{}(detail::as_raw(
                 std::forward<decltype(arguments)>(arguments))...);
         }
     };
