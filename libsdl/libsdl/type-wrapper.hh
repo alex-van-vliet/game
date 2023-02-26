@@ -11,15 +11,15 @@ namespace libsdl {
      * @tparam FUN The function to wrap
      * @tparam OUT The new return type
      */
-    template<FunctionWrapperConcept FUN, typename OUT>
+    template <FunctionWrapperConcept FUN, typename OUT>
     class TypeWrapper {
-    public:
+      public:
         using out_t = OUT;
 
-        constexpr OUT operator()(auto &&... arguments) const {
+        constexpr OUT operator()(auto&&... arguments) const {
             return OUT{FUN{}(std::forward<decltype(arguments)>(arguments)...)};
         }
     };
-}
+} // namespace libsdl
 
-#endif //LIBSDL_TYPE_WRAPPER_HH
+#endif // LIBSDL_TYPE_WRAPPER_HH

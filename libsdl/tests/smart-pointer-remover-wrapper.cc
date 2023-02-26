@@ -4,14 +4,15 @@
 using namespace libsdl;
 
 namespace {
-    int my_function(const int *value) {
-        return *value;
-    }
+    int my_function(const int* value) { return *value; }
 
-    constexpr SmartPointerRemoverWrapper<FunctionWrapper<my_function>> my_wrapped_function;
-}
+    constexpr SmartPointerRemoverWrapper<FunctionWrapper<my_function>>
+        my_wrapped_function;
+} // namespace
 
-TEST_CASE("smart pointer remover wrapped functions should accept unique pointers as arguments", "[libsdl]") {
+TEST_CASE("smart pointer remover wrapped functions should accept unique "
+          "pointers as arguments",
+          "[libsdl]") {
     REQUIRE(std::is_same_v<decltype(my_wrapped_function)::out_t, int>);
 
     auto res = my_wrapped_function(std::make_unique<int>(2));
@@ -34,7 +35,9 @@ TEST_CASE("smart pointer remover wrapped functions should accept unique pointers
     REQUIRE(res == 5);
 }
 
-TEST_CASE("smart pointer remover wrapped functions should still accept raw pointers", "[libsdl]") {
+TEST_CASE(
+    "smart pointer remover wrapped functions should still accept raw pointers",
+    "[libsdl]") {
     REQUIRE(std::is_same_v<decltype(my_wrapped_function)::out_t, int>);
 
     int value = 6;

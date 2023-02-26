@@ -1,33 +1,35 @@
 #ifndef LIBSDL_SDL_HH
 #define LIBSDL_SDL_HH
 
-#include <SDL.h>
 #include <memory>
-#include "function-wrapper.hh"
-#include "type-wrapper.hh"
+#include <SDL.h>
 #include "error-checker-wrapper.hh"
+#include "function-wrapper.hh"
 #include "smart-pointer-remover-wrapper.hh"
+#include "type-wrapper.hh"
 
 namespace {
     // Create a functor to get the SDL error
     using GetError = decltype([]() { return SDL_GetError(); });
 
-    // Helper to create a wrapper that only supports automatic smart pointer to raw pointer conversion
-    template<auto FUN>
-    using UncheckedWrapper = libsdl::SmartPointerRemoverWrapper<libsdl::FunctionWrapper<FUN>>;
+    // Helper to create a wrapper that only supports automatic smart pointer to
+    // raw pointer conversion
+    template <auto FUN>
+    using UncheckedWrapper =
+        libsdl::SmartPointerRemoverWrapper<libsdl::FunctionWrapper<FUN>>;
 
     /**
-     * Helper to automatically determine the correct way to test a value and call the error functor
+     * Helper to automatically determine the correct way to test a value and
+     * call the error functor
      * @tparam T The type of the checked value
      * @tparam ERROR A functor to get the error message
      */
-    template<typename T, typename ERROR>
-    class Checker {
-    };
+    template <typename T, typename ERROR>
+    class Checker {};
 
-    template<std::signed_integral T, typename ERROR>
+    template <std::signed_integral T, typename ERROR>
     class Checker<T, ERROR> {
-    public:
+      public:
         void operator()(auto res) {
             if (res < 0) {
                 throw std::runtime_error(ERROR{}());
@@ -35,10 +37,10 @@ namespace {
         }
     };
 
-    template<typename T, typename ERROR>
-    class Checker<T *, ERROR> {
-    public:
-        void operator()(const T *res) {
+    template <typename T, typename ERROR>
+    class Checker<T*, ERROR> {
+      public:
+        void operator()(const T* res) {
             if (res == nullptr) {
                 throw std::runtime_error(ERROR{}());
             }
@@ -46,47 +48,50 @@ namespace {
     };
 
     /**
-     * Helper to create a wrapper that adds the error checker if the return type is not void
+     * Helper to create a wrapper that adds the error checker if the return type
+     * is not void
      * @tparam FUN The function to wrap
      * @tparam OUT The output type of the function
      * @tparam ERROR The error message functor
      */
-    template<auto FUN, typename OUT, typename ERROR>
+    template <auto FUN, typename OUT, typename ERROR>
     class WrapperHelper {
-    public:
-        using type = libsdl::ErrorCheckerWrapper<UncheckedWrapper<FUN>, Checker<OUT, ERROR>>;
+      public:
+        using type = libsdl::ErrorCheckerWrapper<UncheckedWrapper<FUN>,
+                                                 Checker<OUT, ERROR>>;
     };
 
-    template<auto FUN, typename ERROR>
+    template <auto FUN, typename ERROR>
     class WrapperHelper<FUN, void, ERROR> {
-    public:
+      public:
         using type = UncheckedWrapper<FUN>;
     };
 
-    // Helper to create a wrapper that supports automatic error checking and smart pointer to raw pointer conversion
-    template<auto FUN, typename ERROR=GetError>
-    using Wrapper = typename WrapperHelper<FUN, typename libsdl::FunctionWrapper<FUN>::out_t, ERROR>::type;
-
-    // Helper to create a wrapper that supports type conversion, automatic error checking and
+    // Helper to create a wrapper that supports automatic error checking and
     // smart pointer to raw pointer conversion
-    template<auto FUN, typename OUT, typename ERROR=GetError>
+    template <auto FUN, typename ERROR = GetError>
+    using Wrapper = typename WrapperHelper<
+        FUN, typename libsdl::FunctionWrapper<FUN>::out_t, ERROR>::type;
+
+    // Helper to create a wrapper that supports type conversion, automatic error
+    // checking and smart pointer to raw pointer conversion
+    template <auto FUN, typename OUT, typename ERROR = GetError>
     using TypedWrapper = libsdl::TypeWrapper<Wrapper<FUN, ERROR>, OUT>;
-}
+} // namespace
 
 namespace libsdl {
     class DefaultDeleter {
-    public:
-        auto operator()(SDL_Window *p) const noexcept {
-            SDL_DestroyWindow(p);
-        }
+      public:
+        auto operator()(SDL_Window* p) const noexcept { SDL_DestroyWindow(p); }
     };
 
-    template<typename T>
+    template <typename T>
     using unique_ptr = std::unique_ptr<T, DefaultDeleter>;
 
     // The SDL Wrappers
     constexpr Wrapper<SDL_Init> init;
-    constexpr TypedWrapper<SDL_CreateWindow, unique_ptr<SDL_Window>> create_window;
+    constexpr TypedWrapper<SDL_CreateWindow, unique_ptr<SDL_Window>>
+        create_window;
     constexpr Wrapper<SDL_GetWindowSurface> get_window_surface;
     constexpr Wrapper<SDL_FillRect> fill_rect;
     constexpr UncheckedWrapper<SDL_MapRGB> map_rgb;
@@ -98,35 +103,33 @@ namespace libsdl {
     class Context {
         bool should_delete;
 
-    public:
-        explicit Context(Uint32 flags) : should_delete{true} {
-            init(flags);
-        }
+      public:
+        explicit Context(Uint32 flags) : should_delete{true} { init(flags); }
 
         ~Context() {
             if (should_delete)
                 quit();
         }
 
-        Context(const Context &) = delete;
+        Context(const Context&) = delete;
 
-        Context &operator=(const Context &) = delete;
+        Context& operator=(const Context&) = delete;
 
-        Context(Context &&other) noexcept: should_delete{false} {
+        Context(Context&& other) noexcept : should_delete{false} {
             swap(*this, other);
         }
 
-        Context &operator=(Context &&other) noexcept {
+        Context& operator=(Context&& other) noexcept {
             swap(*this, other);
 
             return *this;
         }
 
-        friend void swap(Context &first, Context &second) {
+        friend void swap(Context& first, Context& second) {
             using std::swap;
             swap(first.should_delete, second.should_delete);
         }
     };
-}
+} // namespace libsdl
 
-#endif //LIBSDL_SDL_HH
+#endif // LIBSDL_SDL_HH

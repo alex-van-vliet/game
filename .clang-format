@@ -1,0 +1,13 @@
+BasedOnStyle: llvm
+IndentWidth: 4
+PointerAlignment: Left
+NamespaceIndentation: All
+IncludeCategories:
+  - Regex: '^<[a-z]*>$'
+    Priority: 1
+  - Regex: '^<.*>$'
+    Priority: 2
+  - Regex: '.*'
+    Priority: 3
+IndentRequiresClause: false
+AlwaysBreakTemplateDeclarations: true
