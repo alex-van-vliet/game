@@ -84,8 +84,7 @@ namespace libsdl {
     constexpr Wrapper<SDL_Init> init;
     using Window = std::unique_ptr<SDL_Window, Deleter<SDL_DestroyWindow>>;
     constexpr TypedWrapper<SDL_CreateWindow, Window> create_window;
-    using WindowSurface = std::unique_ptr<SDL_Surface, NoDeleter>;
-    constexpr TypedWrapper<SDL_GetWindowSurface, WindowSurface> get_window_surface;
+    constexpr Wrapper<SDL_GetWindowSurface> get_window_surface;
     constexpr Wrapper<SDL_FillRect> fill_rect;
     constexpr UncheckedWrapper<SDL_MapRGB> map_rgb;
     constexpr Wrapper<SDL_UpdateWindowSurface> update_window_surface;
