@@ -9,12 +9,6 @@
 #include "smart-pointer-remover-wrapper.hh"
 
 namespace {
-    // Creates a deleter for unique_ptr from a function
-    template<auto FUN>
-    using Deleter = decltype([](auto *arg) { FUN(arg); });
-    // Creates a deleter for unique_ptr which does nothing
-    using NoDeleter = decltype([](auto *arg) {});
-
     // Create a functor to get the SDL error
     using GetError = decltype([]() { return SDL_GetError(); });
 
@@ -80,10 +74,19 @@ namespace {
 }
 
 namespace libsdl {
+    class DefaultDeleter {
+    public:
+        auto operator()(SDL_Window *p) const noexcept {
+            SDL_DestroyWindow(p);
+        }
+    };
+
+    template<typename T>
+    using unique_ptr = std::unique_ptr<T, DefaultDeleter>;
+
     // The SDL Wrappers
     constexpr Wrapper<SDL_Init> init;
-    using Window = std::unique_ptr<SDL_Window, Deleter<SDL_DestroyWindow>>;
-    constexpr TypedWrapper<SDL_CreateWindow, Window> create_window;
+    constexpr TypedWrapper<SDL_CreateWindow, unique_ptr<SDL_Window>> create_window;
     constexpr Wrapper<SDL_GetWindowSurface> get_window_surface;
     constexpr Wrapper<SDL_FillRect> fill_rect;
     constexpr UncheckedWrapper<SDL_MapRGB> map_rgb;
